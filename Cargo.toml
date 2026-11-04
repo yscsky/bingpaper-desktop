@@ -2,5 +2,19 @@
 name = "bingpaper-desktop"
 version = "1.0.0"
 edition = "2024"
+authors = ["ysc <skyholmes@163.com>"]
+description = "拉取 bing 每日图片，设置桌面壁纸。"
+license = "MIT"
+documentation = "https://github.com/yscsky/bingpaper-desktop"
+homepage = "https://github.com/yscsky/bingpaper-desktop"
+repository = "https://github.com/yscsky/bingpaper-desktop"
+readme = "README.md"
+keywords = ["bing", "wallpaper", "niri"]
+categories = ["gui", "graphics", "api-bindings"]
 
 [dependencies]
+anyhow = "1.0.104"
+gpui-kit = "0.9.0"
+reqwest = { version = "0.13.5", features = ["json"] }
+serde = { version = "1.0.229", features = ["derive"] }
+tokio = { version = "1.54.1", features = ["full"] }
