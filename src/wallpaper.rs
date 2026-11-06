@@ -1,4 +1,8 @@
-use std::{fs::File, io::Write, path::Path};
+use std::{
+    fs::{self, File},
+    io::Write,
+    path::{Path, PathBuf},
+};
 
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
@@ -37,7 +41,7 @@ struct ImageUrl {
     wallpaper: String,
 }
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct Wallpaper {
     pub time: String,
     pub name: String,
@@ -76,9 +80,22 @@ pub async fn get_wallpapers() -> Result<Vec<Wallpaper>> {
 }
 
 pub async fn download_picture(home: &str, wp: Wallpaper) -> Result<String> {
-    let path = format!("{}/{}-{}.jpg", home, wp.time, wp.name);
-    if Path::new(&path).exists() {
-        println!("Picture exists: {}", path);
+    let path = download_picture_to(Path::new(home), &wp).await?;
+    Ok(path.to_string_lossy().into_owned())
+}
+
+/// 把图片下载到 `dir` 目录，返回本地文件路径。
+///
+/// 目标文件已存在时直接返回，不重复下载。
+pub async fn download_picture_to(dir: &Path, wp: &Wallpaper) -> Result<PathBuf> {
+    fs::create_dir_all(dir)?;
+
+    let path = dir.join(format!(
+        "{}-{}.jpg",
+        wp.time,
+        sanitize_file_stem(&wp.name)
+    ));
+    if path.exists() {
         return Ok(path);
     }
 
@@ -87,6 +104,25 @@ pub async fn download_picture(home: &str, wp: Wallpaper) -> Result<String> {
     File::create(&path)?.write_all(&content)?;
 
     Ok(path)
+}
+
+fn sanitize_file_stem(name: &str) -> String {
+    let cleaned: String = name
+        .chars()
+        .map(|c| {
+            if c == '/' || c == '\\' || c == ':' || c.is_control() {
+                '_'
+            } else {
+                c
+            }
+        })
+        .collect();
+    let cleaned = cleaned.trim();
+    if cleaned.is_empty() {
+        "bing-wallpaper".to_string()
+    } else {
+        cleaned.to_string()
+    }
 }
 
 #[cfg(test)]

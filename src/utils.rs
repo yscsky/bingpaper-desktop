@@ -1,9 +1,30 @@
 use std::env;
 
+use anyhow::{Result, anyhow};
+
 const HOME: &str = "BING_PAPER_HOME";
+
+pub fn try_get_home() -> Result<String> {
+    env::var(HOME).map_err(|_| anyhow!("请先设置 BING_PAPER_HOME 环境变量"))
+}
 
 pub fn get_home() -> String {
     env::var(HOME).expect("You may export BING_PAPER_HOME environment")
+}
+
+/// 把 bing 的 `Ssd` 时间戳（如 `20260923`）格式化为 `2026-09-23`。
+pub fn format_time(time: &str) -> String {
+    let digits = time.trim();
+    if digits.len() == 8 && digits.bytes().all(|b| b.is_ascii_digit()) {
+        format!(
+            "{}-{}-{}",
+            &digits[0..4],
+            &digits[4..6],
+            &digits[6..8]
+        )
+    } else {
+        digits.to_string()
+    }
 }
 
 pub fn convert_url(s: String) -> String {

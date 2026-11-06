@@ -1,3 +1,4 @@
+pub mod app;
 mod dms;
 mod utils;
 mod wallpaper;

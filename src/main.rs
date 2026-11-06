@@ -1,32 +1,22 @@
-use gpui_kit::component::button::{Button, ButtonVariants};
+use bingpaper_desktop::app::BingPaper;
 use gpui_kit::*;
 
-struct HelloWorld;
-
-impl Render for HelloWorld {
-    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
-        div()
-            .flex()
-            .flex_col()
-            .size_full()
-            .items_center()
-            .justify_center()
-            .gap_2()
-            .child("Hello, World!")
-            .child(
-                Button::new("hello")
-                    .primary()
-                    .label("Click me")
-                    .on_click(|_, _, _| println!("Clicked!")),
-            )
-    }
-}
-
 fn main() {
-    application().with_assets(assets::Assets).run(|cx| {
-        init(cx);
+    let app = gpui_kit::application().with_assets(gpui_kit::assets::Assets);
 
-        open_window(WindowOptions::default(), cx, |_, cx| cx.new(|_| HelloWorld))
+    app.run(|cx| {
+        gpui_kit::init(cx);
+
+        let window_options = WindowOptions {
+            window_bounds: Some(WindowBounds::centered(size(px(1100.), px(720.)), cx)),
+            titlebar: Some(TitlebarOptions {
+                title: Some("Bing 每日图片".into()),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        open_window(window_options, cx, |_, cx| cx.new(BingPaper::new))
             .expect("Failed to open window");
     });
 }
